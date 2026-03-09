@@ -87,12 +87,13 @@ node --version
 #### Linux Users
 ```bash
 # Ubuntu/Debian
-1) install nvm(Node Version Manager): 
+#1) install nvm(Node Version Manager): 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-2) reboot terminal or run the following: 
+#2) reboot terminal or run the following: 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-3)install Node.js 18: nvm install 18
+#3)install Node.js 18:
+nvm install 18
 
 # Verify installation
 node --version
