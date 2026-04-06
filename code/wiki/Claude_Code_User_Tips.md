@@ -269,7 +269,7 @@ When running large batches of compute jobs on HPC clusters via SLURM, Out of Mem
 ### Skill File Location
 
 ```
-/mnt/home/aliu1/project/software/claude_code/skills/slurm-monitor/SKILL.md
+skills/slurm-monitor/SKILL.md
 ```
 
 ### Supported Job Modes
@@ -354,7 +354,7 @@ When monitoring completes, a summary report (`monitor_summary.txt`) is generated
 
 ### References
 
-- Skill definition: `/mnt/home/aliu1/project/software/claude_code/skills/slurm-monitor/SKILL.md`
+- Skill definition: `skills/slurm-monitor/SKILL.md`
 - Claude Code Custom Skills Documentation: <https://docs.anthropic.com/en/docs/claude-code/skills>
 - SLURM Official Documentation: <https://slurm.schedmd.com/documentation.html>
 
