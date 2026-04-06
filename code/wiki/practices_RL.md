@@ -199,6 +199,118 @@ git push   # should now work without password prompts
 
 ---
 
+### Git Conventions for Rollback (Add to `CLAUDE.md`)
+
+In Claude Code, Git is not just version control — it is the **safety net between you and Claude**.
+The faster Claude executes, the finer-grained this net must be.
+Fine-grained commits + clear messages + explicit checkpoints = precise, low-cost rollback.
+
+#### Commit Message Format (Conventional Commits)
+
+```
+<type>(<scope>): <subject — ≤72 chars>
+
+<body — explain why, trade-offs, and known limitations>
+```
+
+| Type | Meaning |
+|---|---|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `refactor` | Refactoring (no functional change) |
+| `perf` | Performance improvement |
+| `test` | Test-related changes |
+| `docs` | Documentation only |
+| `checkpoint` | Safety snapshot before a large change |
+
+**Pre-commit checklist:**
+- Code compiles / script runs without error
+- Relevant unit tests pass
+- No debug `print` / `cat` statements committed
+
+**Good commit body example:**
+```
+feat(keyframe): add scene change detection using histogram diff
+
+Chose histogram approach over ML model because:
+- Single-frame processing < 5ms on target hardware
+- No extra model files needed (~30MB savings)
+- Error rate < 3%, sufficient for current use case
+
+Known limitation: HDR video histograms differ in distribution;
+detection threshold needs tuning — HDR not supported in this release.
+```
+
+**Bad commits (useless for rollback):**
+```
+fix bug
+update code
+WIP
+```
+
+#### Commit Granularity
+
+Commit once per meaningful step — do **not** wait for an entire feature to be done.
+Fine-grained commits let Claude `git revert` a single step precisely.
+
+```bash
+# After completing Step 1
+git commit -m "feat(pipeline): add sample QC filter by read depth"
+
+# After completing Step 2
+git commit -m "feat(pipeline): add normalization using DESeq2 size factors"
+```
+
+#### Branch Naming
+
+| Scenario | Branch name |
+|---|---|
+| New feature | `feature/<short-description>` |
+| Bug fix | `fix/<issue-description>` |
+| Refactor | `refactor/<module-name>` |
+| Analysis run | `analysis/<dataset>-<assay>` |
+
+#### Checkpoint Before Any Large Change
+
+Before asking Claude to do any broad refactor or multi-file change, manually commit a checkpoint:
+
+```bash
+git add -A && git commit -m "checkpoint: before refactoring <module-name>"
+```
+
+This is your guaranteed recovery point — no matter what Claude does next, you can always return here with:
+
+```bash
+git reset --hard <checkpoint-commit-hash>
+```
+
+#### Rollback Commands
+
+```bash
+# Find the offending commit
+git log --oneline -20
+
+# Safe rollback: revert one commit without touching others
+git revert <commit-hash>
+
+# Full reset to checkpoint (destructive — discards all commits after it)
+git reset --hard <checkpoint-commit-hash>
+```
+
+> **Rule:** The better your commit messages, the more precisely Claude can locate and revert the exact change that caused a problem — without touching anything else.
+
+---
+
+### Auto-push Behavior (Add to `CLAUDE.md`)
+```markdown
+## Auto-push Rule
+When a task is complete and changes are staged:
+1. `git status` — confirm no raw data files staged
+2. `git push` — if auth fails, run `ssh-add ~/.ssh/id_ed25519` and retry once
+3. If still failing, report the exact error; never store or echo credentials
+```
+---
+
 ### Pre-push Security Hook
 
 Install once per repo — Claude will respect it and never use `--no-verify`.
@@ -249,15 +361,6 @@ exit 0
 ```
 
 > The `IS_INTERACTIVE` guard is required for HPC/non-interactive environments where `/dev/tty` is unavailable — without it the hook will block all pushes from Claude.
-
-### Add to `CLAUDE.md` for Auto-push Behavior
-```markdown
-## Auto-push Rule
-When a task is complete and changes are staged:
-1. `git status` — confirm no raw data files staged
-2. `git push` — if auth fails, run `ssh-add ~/.ssh/id_ed25519` and retry once
-3. If still failing, report the exact error; never store or echo credentials
-```
 
 ---
 
